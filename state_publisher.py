@@ -32,10 +32,6 @@ def melting_process():
         # state = "UPLOAD_AGAIN"
 
 
-
-
-
-
 if __name__ == "__main__":
     state = "UPLOAD_AGAIN"
     client = mqtt.Client()

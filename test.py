@@ -1,44 +1,88 @@
 import cv2
-from screeninfo import get_monitors
 import numpy as np
+from moviepy.editor import ImageSequenceClip
 
-video = cv2.VideoCapture('vids/holo-QRCode.mp4')
+def melt_image_animation1(image_path, fps=30, duration=10):
+    image = cv2.imread(image_path)
+    height, width, _ = image.shape
+    background = np.zeros((height, width, 3), dtype=np.uint8)
 
-frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    frames = []
+    for i in range(fps * duration):
+        # 计算旋转角度和消融比例
+        angle = i / (fps * duration) * 360
+        melt_ratio = i / (fps * duration)
 
-monitor_width = get_monitors()[0].width
-monitor_height = get_monitors()[0].height
+        # 旋转图像
+        M = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        rotated_image = cv2.warpAffine(image, M, (width, height))
 
-scale = min(monitor_width/frame_width, monitor_height/frame_height)
-new_width = int(frame_width*scale)
-new_height = int(frame_height*scale)
+        # 缩放图像
+        scale = 1 - melt_ratio
+        scaled_image = cv2.resize(rotated_image, None, fx=scale, fy=scale)
 
-cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
-cv2.setWindowProperty('Video', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        # 计算缩放后的图像位置
+        x_offset = int((width - scaled_image.shape[1]) / 2)
+        y_offset = int((height - scaled_image.shape[0]) / 2)
 
-while True:
-    ret, frame = video.read()
+        # 创建背景并将缩放后的图像放置在中心位置
+        background = np.zeros((height, width, 3), dtype=np.uint8)
+        background[y_offset:y_offset+scaled_image.shape[0], x_offset:x_offset+scaled_image.shape[1]] = scaled_image
 
-    if ret == True:
-        # 根据视频的原始长宽比调整帧的大小
-        frame = cv2.resize(frame, (new_width, new_height), interpolation = cv2.INTER_LINEAR)
+        frames.append(background)
+        # cv2.imshow('Animation', background)
+        cv2.waitKey(1)
 
-        # 创建一个与显示器大小相同的黑色背景
-        background = np.zeros((monitor_height, monitor_width, 3), dtype=np.uint8)
+    clip = ImageSequenceClip(frames, fps=fps)
 
-        # 将帧放在背景的中央
-        x_offset = (monitor_width - new_width) // 2
-        y_offset = (monitor_height - new_height) // 2
-        background[y_offset:y_offset+new_height, x_offset:x_offset+new_width] = frame
+    melting_animation_relative_path = "output.mp4"
+    clip.write_videofile(melting_animation_relative_path)
+    # cv2.destroyAllWindows()
+    return melting_animation_relative_path
 
-        cv2.imshow('Video', background)
+import cv2
+import numpy as np
+from moviepy.editor import ImageSequenceClip
 
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            break
-    else:
-        break
+def melt_image_animation(image_path, fps=30, duration=10):
+    image = cv2.imread(image_path)
+    height, width, _ = image.shape
 
-# 释放视频和关闭所有窗口
-video.release()
-cv2.destroyAllWindows()
+    frames = []
+    for i in range(fps * duration):
+        # 计算旋转角度和消融比例
+        angle = i / (fps * duration) * 360
+        melt_ratio = i / (fps * duration)
+
+        # 旋转图像
+        M = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        rotated_image = cv2.warpAffine(image, M, (width, height))
+
+        # 缩放图像
+        scale = 1 - melt_ratio
+        scaled_image = cv2.resize(rotated_image, None, fx=scale, fy=scale,interpolation=cv2.INTER_CUBIC)
+
+        # 计算缩放后的图像位置
+        x_offset = int((width - scaled_image.shape[1]) / 2)
+        y_offset = int((height - scaled_image.shape[0]) / 2)
+
+        # 创建背景并将缩放后的图像放置在中心位置
+        background = np.zeros((height, width, 3), dtype=np.uint8)
+        background[y_offset:y_offset+scaled_image.shape[0], x_offset:x_offset+scaled_image.shape[1]] = scaled_image
+
+        # 转换到HSV色彩空间并减小饱和度
+        hsv = cv2.cvtColor(background, cv2.COLOR_BGR2HSV)
+        hsv[:, :, 1] = hsv[:, :, 1] * (1.0 - melt_ratio)
+        color_faded_image = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        frames.append(color_faded_image)
+
+    clip = ImageSequenceClip(frames, fps=fps)
+
+    melting_animation_relative_path = image_path.split('.')[0] + '_melted.mp4'
+    clip.write_videofile(melting_animation_relative_path)
+
+    return melting_animation_relative_path
+
+if __name__ == "__main__":
+    melt_image_animation("bear.jpg")

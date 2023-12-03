@@ -69,8 +69,6 @@ def melt_image_animation(image_path, fps=30, duration=10):
     image = cv2.imread(image_path)
     height, width, _ = image.shape
     background = np.zeros((height, width, 3), dtype=np.uint8)
-    # cv2.namedWindow('Animation', cv2.WINDOW_NORMAL)
-    # cv2.setWindowProperty('Animation', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     frames = []
     for i in range(fps * duration):
@@ -94,7 +92,12 @@ def melt_image_animation(image_path, fps=30, duration=10):
         background = np.zeros((height, width, 3), dtype=np.uint8)
         background[y_offset:y_offset+scaled_image.shape[0], x_offset:x_offset+scaled_image.shape[1]] = scaled_image
 
-        frames.append(background)
+        # 转换到HSV色彩空间并减小饱和度
+        hsv = cv2.cvtColor(background, cv2.COLOR_BGR2HSV)
+        hsv[:, :, 1] = hsv[:, :, 1] * (1.0 - melt_ratio)
+        color_faded_image = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        frames.append(color_faded_image)
         # cv2.imshow('Animation', background)
         cv2.waitKey(1)
 

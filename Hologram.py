@@ -111,8 +111,8 @@ def rotate_bound(image, angle):
     return cv2.warpAffine(image, M, (nW, nH))
     
 if __name__ == '__main__' :
-    orig = cv2.imread('bear.jpg')
+    orig = cv2.imread('QRCode.png')
     orig = cv2.resize(orig, (640, 640), interpolation = cv2.INTER_CUBIC)
     holo = makeHologram(orig,scale=1)
     # process_video_holo("test.avi","test")
-    cv2.imwrite("hologram.png",holo)
+    cv2.imwrite("holo-QRCode.jpg",holo)

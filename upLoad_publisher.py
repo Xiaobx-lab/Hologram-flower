@@ -17,14 +17,16 @@ def upload_file(file):
     # may be organise the file.name to a location that your others codes need it.
     return file.name
 
+client = mqtt.Client()
+client.connect("localhost", 1883, 60)
+client.loop_start()
+
 with gr.Blocks() as demo:
     file_output = gr.File()
     upload_button = gr.UploadButton("Click to Upload a File", file_types=["image"], file_count="single")
     upload_button.upload(upload_file, upload_button, file_output)
 
-
-client = mqtt.Client()
-client.connect("localhost", 1883, 60)
-
 demo.launch(server_port=8443)
+
+client.loop_stop()
 
