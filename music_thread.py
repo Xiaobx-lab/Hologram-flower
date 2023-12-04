@@ -49,3 +49,12 @@ class music_play_thread(threading.Thread):
                 pass
             pygame.mixer.music.stop()
             time.sleep(1)
+        elif self.state == "ENDING":
+            pygame.mixer.init()
+            pygame.mixer.music.load(filename)
+            pygame.mixer.music.play(loops=-1)
+            while self.state == "ENDING":
+                time.sleep(1)
+                pass
+            pygame.mixer.music.stop()
+            time.sleep(1)

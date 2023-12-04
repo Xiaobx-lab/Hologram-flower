@@ -123,7 +123,7 @@ def all_video_player_blender():
     global playback_speed
     colors = extract_main_colors(image_path)
     color = find_closest_color(colors,pre_rgbs)
-    flower_video_name = 'res/'+'holo_'+str(color[0])+'_' + str(color[1]) +'_' + str(color[2]) + '.mp4'
+    flower_video_name = 'holo_'+str(color[0])+'_' + str(color[1]) +'_' + str(color[2]) + '.mp4'
 
     music_rendering_thread = music_play_thread('SFX/growing.wav')
     music_rendering_thread.state = "RENDERING"
@@ -132,7 +132,7 @@ def all_video_player_blender():
     music_rendering_thread.start()
 
 
-    cap = cv2.VideoCapture(flower_video_name)
+    cap = cv2.VideoCapture('flower/'+flower_video_name)
     monitor_width, monitor_height, new_width, new_height = set_full_screen_before(cap)
     fps = cap.get(cv2.CAP_PROP_FPS)
     # new_frame_interval = int(1000/(fps*playback_speed))
@@ -149,15 +149,41 @@ def all_video_player_blender():
                 break
         else:
             # play audio after flower
+            # music_rendering_thread.state = "RENDERING_DONE"
+            # music_rendering_thread.join()
+            # filename = 'SFX/bingo.wav'
+            # pygame.mixer.init()
+            # pygame.mixer.music.load(filename)
+            # pygame.mixer.music.play()
+            # while pygame.mixer.music.get_busy() == True:
+            #     continue
+            # break
             music_rendering_thread.state = "RENDERING_DONE"
             music_rendering_thread.join()
-            filename = 'SFX/bingo.wav'
-            pygame.mixer.init()
-            pygame.mixer.music.load(filename)
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy() == True:
-                continue
+
+            music_ending_thread = music_play_thread('SFX/end.mp3')
+            music_ending_thread.state = "ENDING"
+            music_ending_thread.start()
+
+            cap = cv2.VideoCapture('res/'+flower_video_name)
+            monitor_width, monitor_height, new_width, new_height = set_full_screen_before(cap)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            # new_frame_interval = int(1000/(fps*playback_speed))
+
+            while True:
+                # Capture frame-by-frame
+                ret, frame = cap.read()
+                if ret == True:
+                    background = set_full_screen_middle(frame, new_width, new_height, monitor_height, monitor_width)
+                    # Display the resulting frame
+                    cv2.imshow('Frame', background)
+                    if cv2.waitKey(int(1000 / (fps * 1))) & 0xFF == ord('q'):
+                        break
+                else:
+                    music_ending_thread.state = "ENDING_DONE"
+                    break
             break
+
 
 def set_full_screen_before(cap):
 

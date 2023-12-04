@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 
 if __name__ == "__main__":
 
-    ser = serial.Serial('COM3', 9600, timeout=1)  # 根据实际情况修改串口号和波特率
+    ser = serial.Serial('COM5', 9600, timeout=1)  # 根据实际情况修改串口号和波特率
     client = mqtt.Client()
     client.connect("localhost",1883,60)
     client.loop_start()

@@ -62,7 +62,7 @@ def process_video_holo(video,name):
             frame = cv2.resize(frame, (640, 640), interpolation = cv2.INTER_CUBIC)
             holo = makeHologram(frame)
 
-    out = cv2.VideoWriter('vids/holo_{}.mp4'.format(name),fourcc, 30.0, (holo.shape[0],holo.shape[1]))
+    out = cv2.VideoWriter('flower/holo_{}.mp4'.format(name),fourcc, 30.0, (holo.shape[0],holo.shape[1]))
     print('output_frame_size:',holo.shape[0],holo.shape[1])
     total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     count = 0
